@@ -1,24 +1,45 @@
+import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
-import 'package:travel/core/services/travel_request.dart';
+import 'package:travel/core/model/trailer_model.dart';
+import 'package:video_player/video_player.dart';
 
 class GLTravelContentItem extends StatefulWidget {
-  final String groupChannelCode;
-  GLTravelContentItem(this.groupChannelCode);
+  final GLTrailerModel trailerModel;
+  GLTravelContentItem(this.trailerModel);
 
   @override
   _GLTravelContentItemState createState() => _GLTravelContentItemState();
 }
 
 class _GLTravelContentItemState extends State<GLTravelContentItem> with AutomaticKeepAliveClientMixin {
-  int _pageIndex = 1;
+
+  VideoPlayerController _videoPlayerController;
+  ChewieController _chewieController;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    GLTravelRequest.getData(widget.groupChannelCode, _pageIndex).then((value) {
+    print(widget.trailerModel.trailer);
+    _videoPlayerController = VideoPlayerController.network(widget.trailerModel.trailer)
+      ..initialize().then((_) {
+        setState(() {
 
-    });
+        });
+      });
+    _chewieController = ChewieController(
+      videoPlayerController: _videoPlayerController,
+      aspectRatio: 3/2,
+      placeholder: Container(color: Colors.grey,)
+    );
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _videoPlayerController.dispose();
+    _chewieController.dispose();
+    super.dispose();
   }
 
   @override
@@ -27,11 +48,12 @@ class _GLTravelContentItemState extends State<GLTravelContentItem> with Automati
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Container(
       padding: EdgeInsets.all(15),
       child: Card(
         child: Center(
-          child: Text(widget.groupChannelCode, style: Theme.of(context).textTheme.headline1,)
+          child: Chewie(controller: _chewieController,)
         ),
       ),
     );

@@ -13,12 +13,14 @@ class GLMainPage extends StatefulWidget {
 
 class _GLMainPageState extends State<GLMainPage> {
   int _currentIndex = 0;
+  PageController _pageController = PageController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
+      body: PageView(
+        controller: _pageController,
+        physics: NeverScrollableScrollPhysics(),
         children: pages,
       ),
       bottomNavigationBar: Consumer<GLIndexedViewModel>(
@@ -32,6 +34,7 @@ class _GLMainPageState extends State<GLMainPage> {
               indexedVM.currentIndex = index;
               setState(() {
                 _currentIndex = index;
+                _pageController.jumpToPage(index);
               });
             },
           );

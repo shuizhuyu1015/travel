@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:travel/core/model/travel_tab_model.dart';
-import 'package:travel/core/services/travel_tab_request.dart';
+import 'package:travel/core/model/trailer_model.dart';
+import 'package:travel/core/services/trailer_request.dart';
 import 'package:travel/ui/pages/travel/travel_content_item.dart';
 
 class GLTravelContent extends StatefulWidget {
@@ -9,17 +9,17 @@ class GLTravelContent extends StatefulWidget {
 }
 
 class _GLTravelContentState extends State<GLTravelContent> with SingleTickerProviderStateMixin {
-  final List<GLTravelTabModel> _tabs = [];
   TabController _controller;
+  List<GLTrailerModel> _trailers = [];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    GLTravelTabRequest.getTabData().then((value) {
+    GLTrailerRequest.getTrailers().then((value) {
       _controller = TabController(length: value.length, vsync: this);
       setState(() {
-        _tabs.addAll(value);
+        _trailers = value;
       });
     });
   }
@@ -33,7 +33,7 @@ class _GLTravelContentState extends State<GLTravelContent> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
-    if(_tabs.length == 0) return Center(child: CircularProgressIndicator());
+    if(_trailers.length == 0) return Center(child: CircularProgressIndicator());
     return Column(
       children: <Widget>[
         Container(
@@ -46,16 +46,24 @@ class _GLTravelContentState extends State<GLTravelContent> with SingleTickerProv
             indicator: UnderlineTabIndicator(
               borderSide: BorderSide(color: Color(0xff009dff), width: 3),
             ),
-            tabs: _tabs.map((GLTravelTabModel model) {
-              return Tab(text: model.labelName);
+            tabs: _trailers.map((GLTrailerModel model) {
+              return Tab(
+                child: Container(
+                  alignment: Alignment.center,
+                  constraints: BoxConstraints(
+                    maxWidth: 100
+                  ),
+                  child: Text(model.name, textAlign: TextAlign.center, maxLines: 1,),
+                ),
+              );
             }).toList()
           ),
         ),
         Expanded(
           child: TabBarView(
             controller: _controller,
-            children: _tabs.map((GLTravelTabModel model) {
-              return GLTravelContentItem(model.groupChannelCode);
+            children: _trailers.map((GLTrailerModel model) {
+              return GLTravelContentItem(model);
             }).toList()
           ),
         )
