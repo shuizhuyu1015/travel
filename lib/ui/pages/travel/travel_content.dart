@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:travel/core/model/trailer_model.dart';
 import 'package:travel/core/services/trailer_request.dart';
+import 'package:travel/core/utils/event_bus_manager.dart';
 import 'package:travel/ui/pages/travel/travel_content_item.dart';
 
 class GLTravelContent extends StatefulWidget {
@@ -17,7 +18,10 @@ class _GLTravelContentState extends State<GLTravelContent> with SingleTickerProv
     // TODO: implement initState
     super.initState();
     GLTrailerRequest.getTrailers().then((value) {
-      _controller = TabController(length: value.length, vsync: this);
+      _controller = TabController(length: value.length, vsync: this)
+        ..addListener(() {
+          EventBusManager.fire(VideoTabBarViewInEvent(_controller.index));
+        });
       setState(() {
         _trailers = value;
       });
@@ -51,9 +55,14 @@ class _GLTravelContentState extends State<GLTravelContent> with SingleTickerProv
                 child: Container(
                   alignment: Alignment.center,
                   constraints: BoxConstraints(
-                    maxWidth: 100
+                    maxWidth: 150
                   ),
-                  child: Text(model.name, textAlign: TextAlign.center, maxLines: 1,),
+                  child: Text(
+                    model.name,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               );
             }).toList()
@@ -62,9 +71,9 @@ class _GLTravelContentState extends State<GLTravelContent> with SingleTickerProv
         Expanded(
           child: TabBarView(
             controller: _controller,
-            children: _trailers.map((GLTrailerModel model) {
-              return GLTravelContentItem(model);
-            }).toList()
+            children: List.generate(_trailers.length, (index) {
+              return GLTravelContentItem(_trailers[index], index);
+            })
           ),
         )
       ],
